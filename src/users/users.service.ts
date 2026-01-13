@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { listOfUsers } from '../../DB'; 
+import { nanoid } from 'nanoid';
 
 
 @Injectable()
@@ -11,9 +12,9 @@ export class UsersService {
       id: Date.now(),
       ...createUserDto,
     };
-
+  
     listOfUsers.push(newUser);
-    return newUser;
+    return newUser
   }
 
 
@@ -22,7 +23,12 @@ export class UsersService {
   }
 
   findOne(id: number) {
-    return `This action returns a #${id} user`;
+    for(let i = 0; i < listOfUsers.length; i++){
+      if(listOfUsers[i]["id"] == id){
+        return listOfUsers[i]
+      }
+    }
+  return "User not found"
   }
 
   update(id: number, updateUserDto: UpdateUserDto) {

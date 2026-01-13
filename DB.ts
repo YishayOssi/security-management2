@@ -1,7 +1,5 @@
-export interface User {
-  id: number;
-  name: string;
-  email: string;
-}
+import { CreateUserDto } from "src/users/dto/create-user.dto";
 
-export const listOfUsers: User[] = [];
+
+
+export const listOfUsers: CreateUserDto[] = []
