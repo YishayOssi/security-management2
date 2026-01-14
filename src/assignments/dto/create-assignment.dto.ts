@@ -1,1 +1,11 @@
-export class CreateAssignmentDto {}
+import { IsInt, IsNotEmpty } from 'class-validator';
+
+export class CreateAssignmentDto {
+  @IsInt()
+  @IsNotEmpty()
+  userId: number;
+
+  @IsInt()
+  @IsNotEmpty()
+  shiftId: number;
+}

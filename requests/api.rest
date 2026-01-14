@@ -1,0 +1,132 @@
+@BASE_URL = http://localhost:3010
+
+### Variables - Update these after registration/login
+@COMMANDER_TOKEN =eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywiaWF0IjoxNzY4NDI0MzY0LCJleHAiOjE3Njg1MTA3NjR9.QaNTK7L7pCuMOdfidnU46wsljAWcmSwUy4dhZ3qxALw
+@SOLDIER_TOKEN = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwicm9sZSI6InNvbGRpZXIiLCJpYXQiOjE3Njg0MjQ4MDksImV4cCI6MTc2ODUxMTIwOX0.Q2XDks_zCWye0h4IfqKck6FzMrlEyEBhg4oX7QkVRuc
+@SHIFT_ID =1 
+@SOLDIER_ID =1
+
+### ============================================
+### AUTHENTICATION
+### ============================================
+
+### Register Commander
+POST {{BASE_URL}}/auth/register
+Content-Type: application/json
+
+{
+    "name": "Commander Test",
+    "email": "commander@test.com",
+    "password": "123456",
+    "role": "commander"
+}
+
+### Register Soldier
+POST {{BASE_URL}}/auth/register
+Content-Type: application/json
+
+{
+    "name": "Soldier Test",
+    "email": "soldier@test.com",
+    "password": "123456",
+    "role": "soldier"
+}
+
+### Login as Commander
+# @name commanderLogin
+POST {{BASE_URL}}/auth/login
+Content-Type: application/json
+
+{
+    "email": "commander@test.com",
+    "password": "123456"
+}
+
+### Login as Soldier
+# @name soldierLogin
+POST {{BASE_URL}}/auth/login
+Content-Type: application/json
+
+{
+    "email": "soldier@test.com",
+    "password": "123456"
+}
+
+### ============================================
+### SHIFTS (Commander Only for Creation)
+### ============================================
+
+### Create Shift (Commander Only)
+POST {{BASE_URL}}/shifts
+Content-Type: application/json
+Authorization: Bearer {{COMMANDER_TOKEN}}
+
+{
+    "startTime": "2024-01-15T08:00:00Z",
+    "endTime": "2024-01-15T16:00:00Z",
+    "location": "שער ראשי"
+}
+
+### Create Another Shift (Commander Only)
+POST {{BASE_URL}}/shifts
+Content-Type: application/json
+Authorization: Bearer {{COMMANDER_TOKEN}}
+
+{
+    "startTime": "2024-01-16T08:00:00Z",
+    "endTime": "2024-01-16T16:00:00Z",
+    "location": "מחסן נשק"
+}
+
+### Get All Shifts (Commander - sees all)
+GET {{BASE_URL}}/shifts
+Content-Type: application/json
+Authorization: Bearer {{COMMANDER_TOKEN}}
+
+### Get Shifts (Soldier - sees only assigned)
+GET {{BASE_URL}}/shifts
+Content-Type: application/json
+Authorization: Bearer {{SOLDIER_TOKEN}}
+
+### ============================================
+### ASSIGNMENTS (Commander Only)
+### ============================================
+
+### Create Assignment - Assign Soldier to Shift (Commander Only)
+POST {{BASE_URL}}/assignments
+Content-Type: application/json
+Authorization: Bearer {{COMMANDER_TOKEN}}
+
+{
+    "userId": {{SOLDIER_ID}},
+    "shiftId": {{SHIFT_ID}}
+}
+
+### ============================================
+### ERROR TESTS
+### ============================================
+
+### Try to Create Shift as Soldier (Should Fail - 403 Forbidden)
+POST {{BASE_URL}}/shifts
+Content-Type: application/json
+Authorization: Bearer {{SOLDIER_TOKEN}}
+
+{
+    "startTime": "2024-01-17T08:00:00Z",
+    "endTime": "2024-01-17T16:00:00Z",
+    "location": "שער צדדי"
+}
+
+### Try to Create Assignment as Soldier (Should Fail - 403 Forbidden)
+POST {{BASE_URL}}/assignments
+Content-Type: application/json
+Authorization: Bearer {{SOLDIER_TOKEN}}
+
+{
+    "userId": 1,
+    "shiftId": 1
+}
+
+### Try to Access Shifts Without Token (Should Fail - 401 Unauthorized)
+GET {{BASE_URL}}/shifts
+Content-Type: application/json

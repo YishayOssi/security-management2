@@ -1,26 +1,57 @@
 import { Injectable } from '@nestjs/common';
+import { InjectModel } from '@nestjs/sequelize';
 import { CreateShiftDto } from './dto/create-shift.dto';
-import { UpdateShiftDto } from './dto/update-shift.dto';
+import { Shift } from './entities/shift.entity';
+import { UserRole } from '../users/dto/create-user.dto';
+import { Assignment } from '../assignments/entities/assignment.entity';
+import { Op } from 'sequelize';
 
 @Injectable()
 export class ShiftsService {
-  create(createShiftDto: CreateShiftDto) {
-    return 'This action adds a new shift';
+  constructor(
+    @InjectModel(Shift)
+    private shiftModel: typeof Shift,
+    @InjectModel(Assignment)
+    private assignmentModel: typeof Assignment,
+  ) {}
+
+  async create(createShiftDto: CreateShiftDto): Promise<Shift> {
+    return await this.shiftModel.create({
+      startTime: new Date(createShiftDto.startTime),
+      endTime: new Date(createShiftDto.endTime),
+      location: createShiftDto.location,
+    } as any);
   }
 
-  findAll() {
-    return `This action returns all shifts`;
-  }
+  async findAll(userId: number, role: UserRole): Promise<Shift[]> {
+    if (role === UserRole.COMMANDER) {
+      // Commanders see all shifts
+      return await this.shiftModel.findAll({
+        order: [['startTime', 'ASC']],
+      });
+    } else {
+      // Soldiers see only their assigned shifts
+      // Get shift IDs from assignments
+      const assignments = await this.assignmentModel.findAll({
+        where: { userId },
+        attributes: ['shiftId'],
+      });
 
-  findOne(id: number) {
-    return `This action returns a #${id} shift`;
-  }
+      const shiftIds = assignments.map((a) => a.shiftId);
 
-  update(id: number, updateShiftDto: UpdateShiftDto) {
-    return `This action updates a #${id} shift`;
-  }
+      if (shiftIds.length === 0) {
+        return [];
+      }
 
-  remove(id: number) {
-    return `This action removes a #${id} shift`;
+      // Get the actual shifts
+      return await this.shiftModel.findAll({
+        where: {
+          id: {
+            [Op.in]: shiftIds,
+          },
+        },
+        order: [['startTime', 'ASC']],
+      });
+    }
   }
 }

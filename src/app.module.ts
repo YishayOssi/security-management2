@@ -5,9 +5,10 @@ import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { ShiftsModule } from './shifts/shifts.module';
 import { AssignmentsModule } from './assignments/assignments.module';
+import { DatabaseModule } from './database/database.module';
 
 @Module({
-  imports: [AuthModule, UsersModule, ShiftsModule, AssignmentsModule],
+  imports: [DatabaseModule, AuthModule, UsersModule, ShiftsModule, AssignmentsModule],
   controllers: [AppController],
   providers: [AppService],
 })

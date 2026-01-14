@@ -1,41 +1,44 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectModel } from '@nestjs/sequelize';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { listOfUsers } from '../../DB'; 
-import { nanoid } from 'nanoid';
-
+import { User } from './entities/user.entity';
 
 @Injectable()
 export class UsersService {
-  create(createUserDto: CreateUserDto) {
-    const newUser = {
-      id: Date.now(),
-      ...createUserDto,
-    };
-  
-    listOfUsers.push(newUser);
-    return newUser
+  constructor(
+    @InjectModel(User)
+    private userModel: typeof User,
+  ) {}
+
+  async create(createUserDto: CreateUserDto): Promise<User> {
+    return await this.userModel.create(createUserDto as any);
   }
 
-
-  findAll() {
-    return listOfUsers
+  async findAll(): Promise<User[]> {
+    return await this.userModel.findAll();
   }
 
-  findOne(id: number) {
-    for(let i = 0; i < listOfUsers.length; i++){
-      if(listOfUsers[i]["id"] == id){
-        return listOfUsers[i]
-      }
+  async findOne(id: number): Promise<User> {
+    const user = await this.userModel.findByPk(id);
+    if (!user) {
+      throw new NotFoundException(`User with ID ${id} not found`);
     }
-  return "User not found"
+    return user;
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  async findByEmail(email: string): Promise<User | null> {
+    return await this.userModel.findOne({ where: { email } });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  async update(id: number, updateUserDto: UpdateUserDto): Promise<User> {
+    const user = await this.findOne(id);
+    await user.update(updateUserDto);
+    return user;
+  }
+
+  async remove(id: number): Promise<void> {
+    const user = await this.findOne(id);
+    await user.destroy();
   }
 }
