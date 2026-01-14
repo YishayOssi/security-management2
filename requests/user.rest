@@ -1,0 +1,18 @@
+@BASE_URL = http://localhost:3010
+@ENDPOINT=users
+
+### create new user
+post {{BASE_URL}}/{{ENDPOINT}}
+Content-Type: application/json
+
+{
+    "name":"test",
+    "email":"test@gmail.com",
+    "password":"123456",
+    "role":"commander"
+}
+
+### get all users
+get {{BASE_URL}}/{{ENDPOINT}}
+Content-Type: application/json
+

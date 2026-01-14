@@ -34,3 +34,4 @@ create(@Body() data: CreateUserDto) {
     return this.usersService.remove(+id);
   }
 }
+
